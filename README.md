@@ -4,6 +4,11 @@ An AI sales assistant for Instagram DMs, built with n8n. It answers customers in
 
 > **Demo project.** The example brand "Saey Fragrances" is used for demonstration only. This repo is unofficial and not affiliated with or endorsed by the brand. Replace the brand name, catalog, contact details and payment number with your own.
 
+![Instagram AI Sales Agent workflow in n8n](workflow.png)
+
+*Workflow in n8n. The exported JSON also includes an Acknowledge Webhook node that is not in this screenshot.*
+
+
 ## What it does
 
 - Replies in the customer's language (English or Roman Urdu)
