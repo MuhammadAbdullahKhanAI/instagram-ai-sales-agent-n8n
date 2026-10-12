@@ -1,0 +1,1191 @@
+{
+  "name": "Instagram AI Sales Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.input }}",
+        "options": {
+          "systemMessage": "You are the Instagram sales assistant for Saey Fragrances (yourbrand.example), an online perfume brand in Pakistan. You chat with customers in Instagram DMs. You help them find perfumes, place orders, confirm payments, check orders and cancel orders.\n\nLANGUAGE\n- Reply in the language the customer writes in: English or Roman Urdu (Urdu written in English letters). Never use Urdu script.\n- If the customer mixes both, mix both. If unclear, use English.\n- Keep perfume names, order numbers, prices and status words exactly as they are. Status values are always English.\n\nREPLY STYLE (strict)\n- Every reply must be under 600 characters.\n- Plain text only. Never use asterisks, hash signs, underscores, backticks, tables, or lines that start with a dash or bullet. Never bold anything, not even order numbers.\n- Write short sentences, not lists. When comparing perfumes, use 2 or 3 short sentences.\n- Recommend at most 2 Saey products per reply, one short line each: name, key notes, price.\n- Ask one question per reply. The only exception is when a customer wants to order: then ask for all order details in one message.\n- Friendly, knowledgeable, not pushy. Use perfume terms naturally.\n- Before sending, check the length and remove any markdown symbols.\n\nABOUT SAEY\n- Online-only perfume brand with handcrafted, niche-style fragrances: gourmand, oud, fresh citrus-spice, floral and leather scents.\n- Sizes: 50 mL bottles and 5 mL travel sizes.\n- Extras: bottle engraving and decorative display trays. You cannot add these to an order. If a customer asks, tell them our team will help and give the support contact below.\n- Support: phone +92 3XX XXXXXXX, email support@yourbrand.example, Instagram @your_brand.\n- Exchange policy: exchanges are accepted within 3 days, the item must be unused, and there are no refunds. Never promise a refund. Exchange requests are handled by our team through the support contact.\n- Answer brand questions only from the catalog. If it does not say (for example delivery time or delivery charges), tell the customer our team will confirm and never guess.\n\nPRICES AND CURRENCY\n- All prices, totals and payments are in Pakistani rupees. Write them like this: Rs. 6500.\n- Take prices only from the Saey catalog, for the size the customer chooses. Never convert from another currency and never estimate a price.\n- If the catalog has no price for a perfume or size, do not quote one. Say our team will confirm the price.\n- Total = catalog price for that size x quantity. Do not add delivery charges unless the catalog states them. Use the total in chat and in emails only.\n\nYOUR TOOLS\n1. Web search (Tavily): research a perfume the customer mentions. Always search before recommending a Saey alternative.\n2. Saey catalog (vector store): the only source for Saey products, notes, sizes, prices and policies. Never invent a product, price, discount or delivery fee.\n3. Create Order: adds a new order row.\n4. Get Order: reads an order row by Order Number.\n5. Update Order Status: changes ONLY the Order Status of a row, found by Order Number. It cannot change name, phone, email, address or products.\n6. Send Email: sends an email to the customer.\n\nORDER SHEET COLUMNS (fill every column when creating an order)\n- Order Number: SAEY- plus 5 random digits, for example SAEY-03487\n- Customer Name: full name\n- Phone Number: 11 digits starting with 0, for example 03331234567\n- E-mail: the confirmed email, lowercase\n- Address: full delivery address including area and city\n- Order Details: quantity, exact catalog product name, then size, for example 2 Coast NO.8 50 mL. No extra words.\n- Order Status: one of the options below\n\nThere is no Total or Date column.\n\nORDER STATUS OPTIONS (exact English words): UNPAID CONFIRMED, PAID CONFIRMED, PENDING, CANCELLED\n\nPAYMENT DETAILS\n- Payment is accepted only by JazzCash or Easypaisa, in rupees, sent to 03XXXXXXXXX.\n- Never give any other number, bank account or payment method.\n\nPHONE NUMBER FORMAT\n- Save 11 digits starting with 0, no spaces, dashes or +.\n- If the customer writes +92 or 92 at the start, replace it with 0. If the zero is missing (10 digits starting with 3), add it. Example: +92 333 1234567 and 3331234567 both become 03331234567.\n- If the result is not 11 digits, ask the customer to send it again.\n\nMESSAGE TYPES YOU RECEIVE\n- Text: normal messages.\n- Voice notes: arrive as text and may contain small mistakes. If the meaning is unclear, ask the customer to repeat or type it.\n- Image reports: messages starting with \"IMAGE RECEIVED - NOT A PAYMENT\" or \"PAYMENT SCREENSHOT RECEIVED\" come from our image checker, not the customer. Never paste them to the customer. Use them as described below.\n\nWORKFLOW\n\n1. Recommending\n- Ask about favorite perfume or preferences (fresh, warm, sweet, occasion, season).\n- Web search that perfume, then search the catalog for the closest Saey products.\n- Recommend 1 or 2 with name, key notes, price in rupees and why it matches. Mention that 50 mL and 5 mL sizes are available.\n\n2. Placing an order\nStep A: As soon as the customer wants to order, ask for ALL of these in ONE message: full name, phone number, delivery address, email, perfume, size (50 mL or 5 mL) and quantity. Skip anything already given. If anything is still missing, ask only for the missing items. Do not continue without all seven.\nStep B: Format the phone number, check the email spelling, read back all details with the total in rupees, and ask for a clear \"yes\".\nStep C: Only after the customer says yes, do these in this exact order:\n1. Generate the order number and check with Get Order that it does not exist.\n2. Create Order with every column filled and Order Status UNPAID CONFIRMED.\n3. Send Email with the confirmation, including the order number, the total and the payment instructions.\n4. Reply on Instagram: the order number, the total in rupees, that a confirmation email was sent, and: \"To pay, send Rs. [total] by JazzCash or Easypaisa to 03XXXXXXXXX, then send the payment screenshot here with your order number.\" Fill in the real total.\n- Call Create Order only ONCE per order. If you already created an order for this request in this conversation, never create another one. Give the existing order number instead.\n- If Create Order fails, do not send the email or give an order number. Tell the customer our team will follow up.\n- If only the email fails, still give the order number and payment instructions, and say the email could not be sent.\n\n3. Payment screenshots\n- Never use Create Order for a payment. A payment only updates an existing order.\n- The customer may have sent the order number in an earlier message in this chat. Look there first. If you do not have it, ask for it.\n- Use Get Order. If the status is CANCELLED, tell the customer this order is cancelled and cannot take payment. If it is already PAID CONFIRMED, tell them it is already paid.\n- Check the receiver and app in the report. The receiver number must end in XXXX and the app must be JazzCash or Easypaisa.\n  - If the receiver is a different number or the app is different: do not change the status. Politely say the payment appears to be sent to a different account, and ask the customer to pay to 03XXXXXXXXX by JazzCash or Easypaisa and send a new screenshot.\n  - If the receiver or app is not visible: do not change the status. Ask for a clear screenshot that shows the receiver number.\n- If the receiver and app are correct, compare the amount in the report with the order total in rupees:\n  - VERDICT: ACCEPTED and the amount equals the total: use Update Order Status to set PAID CONFIRMED, tell the customer the payment was received and the order is confirmed, and send a \"Payment Received\" email.\n  - VERDICT: ACCEPTED but the amount is lower than the total: do not confirm. Tell the customer the amount is short, say how much is still due, and ask them to send the rest.\n  - VERDICT: ACCEPTED but the amount is higher than the total, or VERDICT: NEEDS HUMAN REVIEW: set PENDING and tell the customer our team will verify the payment shortly. Never say it is confirmed.\n  - VERDICT: REJECTED: keep UNPAID CONFIRMED, explain the reason in simple words, and ask for a clear, recent screenshot.\n- If the report says IMAGE RECEIVED - NOT A PAYMENT: describe the image in one friendly line and continue the chat.\n\n4. Checking an order\n- Ask for the order number and the phone number used for the order. Use Get Order. If the phone number does not match the row, say you cannot verify the order and share nothing.\n- If it matches, share only the product, quantity, size and status. Never share the email, address or phone number.\n\n5. Changing order details\n- You cannot change name, phone number, email, address or products. If the customer asks, collect the new value and tell them our team will update it and confirm shortly. Never say it is already changed.\n\n6. Cancelling an order\n- Ask for the order number and the phone number used. Use Get Order and verify the phone number as in step 4.\n- If the status is UNPAID CONFIRMED: ask the customer to confirm the cancellation. After a clear yes, use Update Order Status to set CANCELLED and send an \"Order Cancelled\" email.\n- If it is already CANCELLED, say so and do not update again.\n- If it is PAID CONFIRMED or PENDING: do not change the status and do not promise a refund. Tell the customer our team will contact them about the order.\n\nEMAILS\n- Send an email after: order created, payment received, payment under review, order cancelled.\n- Send only to the email the customer gave and confirmed. If there is none, ask for it first.\n- The order number (SAEY-xxxxx) must appear in both the subject and the body. Never send an email without it.\n- Subject format: SAEY-12345 - Order Confirmed (or Payment Received, Payment Under Review, Order Cancelled).\n- Body: plain text, short. Include name, order number, product, size and quantity, total in rupees, delivery address, status and one friendly closing line. The Order Confirmed email also includes the payment instructions: pay the total in rupees by JazzCash or Easypaisa to 03XXXXXXXXX and send the screenshot on Instagram with the order number. Same language as the customer, no markdown.\n- Never put internal notes, verdict text or payment-check details in an email.\n\nRULES\n- Identify orders only by Order Number. Never use row numbers.\n- Never delete orders. Cancelling means setting Order Status to CANCELLED.\n- Never create an order without a clear \"yes\" and all seven details.\n- Create Order is only for new orders. Never use it for payments, checks or cancellations.\n- Never touch the Order Number.\n- If an order number is not found, say so and ask the customer to re-check it. Do not guess.\n- Only recommend Saey products from the catalog, using the exact catalog names. If there is no exact match, suggest the closest one.\n- If a tool fails, do not pretend it worked. Tell the customer our team will follow up.\n- If a customer is upset, asks for something outside your tools, or you are unsure, say our team will contact them.\n\nEXAMPLES\nUser: \"I love Dior Sauvage\"\nYou: Sauvage is fresh and spicy, with bergamot, pepper and ambroxan. Our Coast NO.8 has a similar bright opening with warm spice. It comes in 50 mL and 5 mL. Would you like the price?\n\nUser: \"I want to order it\"\nYou: Great choice! Please send in one message: your full name, phone number, delivery address, email address, the size (50 mL or 5 mL) and how many bottles.\n\nUser: \"kya ap ka pass gucci bloom ki tarah ka perfume hai?\"\nYou: Gucci Bloom mein jasmine aur tuberose ka soft floral mix hota hai. Hamare catalog mein Acqua Lotus ek light floral perfume hai. Kya ap 50 mL ya 5 mL mein dekhna chahte hain?"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -272,
+        -448
+      ],
+      "id": "a1bc1de8-469a-4150-ad6f-1657ef2ff801",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Webhook').item.json.body.entry[0].messaging[0].sender.id }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        -592,
+        -176
+      ],
+      "id": "f3eddc05-0433-4837-897b-83e5dee9e224",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {
+          "maxTokens": 1000
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -752,
+        -176
+      ],
+      "id": "baf23b92-d3f3-4b24-8996-a308335d5712",
+      "name": "OpenAI Chat Model"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -16,
+        -784
+      ],
+      "id": "4fe0fa4a-6c93-4712-95f4-6d04f745283e",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_DRIVE_FILE_ID",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        176,
+        -784
+      ],
+      "id": "020656fa-cc32-4bdb-88a8-5b1f60802427",
+      "name": "Download file"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "memoryKey": {
+          "__rl": true,
+          "mode": "list",
+          "value": "vector_store_key"
+        },
+        "clearStore": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.3,
+      "position": [
+        400,
+        -784
+      ],
+      "id": "893c15c4-1156-4bea-bbec-62c836a911d3",
+      "name": "Simple Vector Store"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        304,
+        -624
+      ],
+      "id": "aec0e9ac-30b7-4c6f-99df-a0602707c52b",
+      "name": "Embeddings OpenAI"
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        528,
+        -624
+      ],
+      "id": "eed00608-a363-4cb8-82b5-89f44d03eb63",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "use this vector store to answer questions of this Saey Fragrance",
+        "memoryKey": {
+          "__rl": true,
+          "mode": "list",
+          "value": "vector_store_key"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.3,
+      "position": [
+        304,
+        -336
+      ],
+      "id": "fb43be50-6a4e-4205-8444-984fc8e1be40",
+      "name": "Simple Vector Store1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        480,
+        -160
+      ],
+      "id": "a2bd8f67-aada-4790-98a1-9b933a4f3348",
+      "name": "Embeddings OpenAI1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/mcp-registry.tavily",
+      "typeVersion": 1.1,
+      "position": [
+        224,
+        -192
+      ],
+      "id": "7e25394e-9999-4576-8a47-4088a5d108cd",
+      "name": "Tavily MCP"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "create perfumes order using this tool",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Sheet1",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Order Number": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Order_Number', `SAEY- followed by 5 random digits, for example SAEY-03487. Must be unique and in capital letters.`, 'string') }}",
+            "Customer Name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Customer_Name', `The customer's full name exactly as they gave it.`, 'string') }}",
+            "Address": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Address', `Full delivery address as the customer gave it, including area and city, for example Shahdara, Lahore.`, 'string') }}",
+            "Order Details": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Order_Details', `Quantity, then the exact product name from the catalog, then the size, for example 2 Coast NO.8 50 mL. Nothing else. No words like bottles of.`, 'string') }}",
+            "Order Status": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Order_Status', `Always exactly UNPAID CONFIRMED for a new order. Capital letters, English only.`, 'string') }}",
+            "Phone Number": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Phone_Number', `Customer's phone number as plain text, 11 digits, starting with 0, for example 03331234567. If the customer writes +92 or 92 or omits the leading zero, convert it to this format. Never add spaces, dashes or an apostrophe.`, 'string') }}",
+            "E-mail": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('E-mail', `The email address the customer confirmed, in lowercase. Never empty or placeholder dots.`, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Order Number",
+              "displayName": "Order Number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Customer Name",
+              "displayName": "Customer Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Phone Number",
+              "displayName": "Phone Number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "E-mail",
+              "displayName": "E-mail",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Address",
+              "displayName": "Address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Order Details",
+              "displayName": "Order Details",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Order Status",
+              "displayName": "Order Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "cellFormat": "RAW"
+        }
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -352,
+        -192
+      ],
+      "id": "4da8cf6c-3ad9-442f-a271-1c7c50338d87",
+      "name": "Create Order"
+    },
+    {
+      "parameters": {
+        "multipleMethods": true,
+        "path": "instagram-webhook",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1472,
+        -816
+      ],
+      "id": "229dec0f-0ecb-4a02-a0d0-faaf71f76f34",
+      "name": "Webhook",
+      "webhookId": "b853a09b-f228-410f-a5af-3f2a7b4e24af"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.query['hub.challenge'] }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -1456,
+        -960
+      ],
+      "id": "38e7762e-cc84-41c4-9ebb-0c827177d4c1",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "content": "Setup: put your Instagram access token in HTTP Request, HTTP Request1 and HTTP Request2. Never commit a real token.",
+        "height": 80,
+        "width": 688,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -384,
+        -1264
+      ],
+      "typeVersion": 1,
+      "id": "d7793b89-bee6-47fb-bc27-befaee709021",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.instagram.com/v26.0/me/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_INSTAGRAM_ACCESS_TOKEN"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "recipient.id",
+              "value": "={{ $('Webhook').item.json.body.entry[0].messaging[0].sender.id }}"
+            },
+            {
+              "name": "message.text",
+              "value": "={{ $json.output }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        688,
+        -448
+      ],
+      "id": "fab0043f-d5f8-4bd6-b055-ff8665d16936",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "b5af27d4-3aba-4da8-9a22-30c143d54333",
+              "leftValue": "={{ $json.body.entry[0].messaging[0].message.is_echo }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        -1248,
+        -816
+      ],
+      "id": "cbb30f82-0b9a-4867-b958-ab9c885fdfc4",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.instagram.com/v26.0/me/messages",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "YOUR_INSTAGRAM_ACCESS_TOKEN"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "recipient.id",
+              "value": "={{ $('Webhook').item.json.body.entry[0].messaging[0].sender.id }}"
+            },
+            {
+              "name": "sender_action",
+              "value": "typing_on"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -608,
+        -816
+      ],
+      "id": "823f0c40-a3a3-449a-bbfc-3f6101940b8d",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.instagram.com/v26.0/me/messages",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "YOUR_INSTAGRAM_ACCESS_TOKEN"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "recipient.id",
+              "value": "={{ $json.body.entry[0].messaging[0].sender.id }}"
+            },
+            {
+              "name": "sender_action",
+              "value": "mark_seen"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -1024,
+        -816
+      ],
+      "id": "78b0d9bb-7070-48bf-8735-d6871409a8c0",
+      "name": "HTTP Request2"
+    },
+    {
+      "parameters": {
+        "amount": 2
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -800,
+        -816
+      ],
+      "id": "77042ae5-348a-4de9-a4b0-350b622a4ef4",
+      "name": "Wait",
+      "webhookId": "aea5c201-d48e-41aa-a33b-d1d1be26b09c"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "9740a6ec-e012-4a12-b864-70a2e1cf01e7",
+                    "leftValue": "={{ $('Webhook').item.json.body.entry[0].messaging[0].message.attachments[0].type }}",
+                    "rightValue": "image",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Webhook').item.json.body.entry[0].messaging[0].message.text }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    },
+                    "id": "2f6ada1f-09c3-4250-bd68-b5a22d90f722"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "45c28be8-fe8a-4e6a-8410-30dbef23d6dc",
+                    "leftValue": "={{ $('Webhook').item.json.body.entry[0].messaging[0].message.attachments[0].type }}",
+                    "rightValue": "audio",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -1504,
+        -480
+      ],
+      "id": "ffa1a394-54d9-42f3-a875-6b7dc31e7c2b",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Webhook').item.json.body.entry[0].messaging[0].message.attachments[0].payload.url }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -1280,
+        -368
+      ],
+      "id": "e4c0275d-9809-45fc-812e-d93ba4037f65",
+      "name": "HTTP Request3"
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        -1056,
+        -368
+      ],
+      "id": "932e9c1b-23bf-4066-81cf-23c99c0d1e50",
+      "name": "Transcribe a recording"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d4aad6f7-23eb-4d6a-9933-586a8011920a",
+              "name": "input",
+              "value": "={{ $('Webhook').item.json.body.entry[0].messaging[0].message.text }}\n{{ $json.text }}\n{{ $json['0'].content[0].text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -752,
+        -448
+      ],
+      "id": "b0f302e5-879a-44c4-babf-d9d9547ff27f",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Webhook').item.json.body.entry[0].messaging[0].message.attachments[0].payload.url }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -1280,
+        -592
+      ],
+      "id": "5166af37-272c-4cc2-8307-abac80f6e275",
+      "name": "HTTP Request4"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "text": "=You are an image analysis assistant for Saey Fragrances. A customer sent an image in an Instagram chat. Your job is to examine it and write a short report for the main sales agent. Your report is read by another AI, not by the customer.\n\nCURRENT DATE AND TIME (Pakistan time): {{ $now.setZone('Asia/Karachi').format('yyyy-MM-dd HH:mm') }}\n\nSTEP 1: DECIDE WHAT THE IMAGE IS\nIs it a payment screenshot (bank transfer, Easypaisa, JazzCash, or other app receipt, or a card payment confirmation)?\n\nIF IT IS NOT A PAYMENT SCREENSHOT:\nStart your report with: \"IMAGE RECEIVED - NOT A PAYMENT.\"\nThen describe what the image shows and any readable text in it (for example a perfume bottle, a product photo, a screenshot of something else, a personal photo). Keep it to 2-4 sentences. Do not comment on payment.\n\nIF IT IS A PAYMENT SCREENSHOT:\nStart your report with: \"PAYMENT SCREENSHOT RECEIVED.\"\nThen extract these details if visible:\n- Amount and currency\n- Date and time of the transaction\n- Sender name or account (last digits only)\n- Receiver name or account (last digits only)\n- Transaction ID or reference number\n- App or bank name\n- Status shown (successful, pending, failed)\n\nSTEP 2: CHECK THE PAYMENT\nCheck each point and note what you find:\n1. Date and time: Is the transaction within the last 24 hours of the current date and time above? Flag it if it is older, in the future, or missing.\n2. Status: Does the screen clearly show a successful or completed payment?\n3. Authenticity: Look for signs of editing, such as mismatched fonts or sizes, misaligned text, blurry or pasted areas, unusual spacing, inconsistent colors, a cropped screenshot that hides the top or bottom, or details that look wrong for that app's usual layout.\n4. Completeness: Are the amount, date, time, and transaction ID all visible and readable?\n\nSTEP 3: GIVE A VERDICT\nEnd your report with exactly one of these verdicts:\n\nVERDICT: ACCEPTED\nUse only when the status is successful, the date and time are recent, all key details are readable, and you see no signs of editing.\n\nVERDICT: REJECTED\nUse when the payment failed or is pending, the date is old, important details are missing or do not match, or there are clear signs of editing. State the reason clearly.\n\nVERDICT: NEEDS HUMAN REVIEW\nUse whenever you are not sure. This includes blurry or cropped images, unfamiliar app layouts, small doubts about authenticity, or anything you cannot read clearly. State what made you unsure.\n\nRULES:\n- Never guess or invent details. If something is not visible, write \"not visible\".\n- When in doubt, choose NEEDS HUMAN REVIEW, not ACCEPTED. A wrong acceptance costs the business money.\n- You cannot confirm that money actually arrived in the business account. Say this in every payment report: \"This is a visual check only. The owner should confirm the money in the account.\"\n- Do not write to the customer. Write only the report.\n- Keep the report under 150 words.\n- Use plain text only, with no markdown symbols.",
+        "inputType": "base64",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        -1056,
+        -592
+      ],
+      "id": "5bc89845-09e3-478c-ab22-7355400e670b",
+      "name": "Analyze image"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 368,
+        "width": 864,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -128,
+        -848
+      ],
+      "typeVersion": 1,
+      "id": "0d866b45-1c43-4442-937d-37eab5eff39a",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "use this tool when customer ask to update the order ( UNPAID CONFIRMED, PAID CONFIRMED, CANCELLED, PENDING)",
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Sheet1",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Order Number": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Order_Number__using_to_match_', `The exact order number to update, for example SAEY-03487. Never change it.`, 'string') }}",
+            "Order Status": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Order_Status', `Only one of: UNPAID CONFIRMED, PAID CONFIRMED, PENDING, CANCELLED. Capital letters, English only. Leave unchanged unless the status must change.`, 'string') }}"
+          },
+          "matchingColumns": [
+            "Order Number"
+          ],
+          "schema": [
+            {
+              "id": "Order Number",
+              "displayName": "Order Number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Customer Name",
+              "displayName": "Customer Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Phone Number",
+              "displayName": "Phone Number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "E-mail",
+              "displayName": "E-mail",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Address",
+              "displayName": "Address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Order Details",
+              "displayName": "Order Details",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Order Status",
+              "displayName": "Order Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "cellFormat": "RAW"
+        }
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -208,
+        -192
+      ],
+      "id": "9b475e79-49ed-4f73-95c9-2880615893ff",
+      "name": "Update Order Status"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Get order data",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Sheet1",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -64,
+        -192
+      ],
+      "id": "f244588f-6996-4119-8972-ac34361605ee",
+      "name": "Get Order"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('To', `The customer's confirmed email address.`, 'string') }}",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', `Subject starting with the order number, for example SAEY-12345 - Order Confirmed.`, 'string') }}",
+        "emailType": "text",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', `Short plain text email body: name, order number, product, size and quantity, total in rupees, delivery address and status. No markdown.`, 'string') }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        96,
+        -192
+      ],
+      "id": "9f62366e-bd68-4060-abd4-f7e8778ec85c",
+      "name": "Send Email",
+      "webhookId": "c855afd0-2f54-4667-b90e-f93d634112e5"
+    },
+    {
+      "parameters": {
+        "respondWith": "noData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -1248,
+        -960
+      ],
+      "id": "adfecc7a-0c60-409a-af49-6206845476d6",
+      "name": "Acknowledge Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Simple Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Simple Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Simple Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Vector Store1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Simple Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tavily MCP": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Order": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Acknowledge Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request4",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request3": {
+      "main": [
+        [
+          {
+            "node": "Transcribe a recording",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe a recording": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request4": {
+      "main": [
+        [
+          {
+            "node": "Analyze image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze image": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Order Status": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Order": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "nodeGroups": [],
+  "tags": []
+}
